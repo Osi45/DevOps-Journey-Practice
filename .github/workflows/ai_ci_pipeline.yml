@@ -37,7 +37,7 @@ jobs:
 
       - name: Install Launchable CLI
         run: |
-          pip install launchable pytest
+          pip install "launchable<2.0.0" launchable pytest
 
       - name: Record Build
         run: launchable record build --name build-${{ github.run_id }}
@@ -45,7 +45,7 @@ jobs:
           LAUNCHABLE_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN }}
 
       - name: Subset Tests
-        run: launchable subset subset --target 90% --confidence 90% --base test/ > subset.txt
+        run: launchable subset --target 90% --confidence 90% --base test/ > subset.txt
         env:
           LAUNCHABLE_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN }}
 
