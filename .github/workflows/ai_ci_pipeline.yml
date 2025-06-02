@@ -46,7 +46,7 @@ jobs:
 
       - name: Subset Tests
         run: |
-          launchable subset --target 90% --confidence high --base test/ > subset.txt
+          launchable subset --target 90% --confidence 90% --base test/ > subset.txt
         env:
           LAUNCHABLE_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN }}
 
