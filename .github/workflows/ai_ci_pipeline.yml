@@ -1,0 +1,76 @@
+name: AI CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  code_quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Run Codacy Analysis CLI
+        uses: codacy/codacy-analysis-cli-action@master
+        with:
+          output: results.sarif
+          format: sarif
+          gh-code-scanning-compat: true
+          max-allowed-issues: 2147483647
+
+      - name: Upload SARIF to GitHub
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results.sarif
+
+  test_selection:
+    name: Intelligent Test Selection
+    runs-on: ubuntu-latest
+    needs: code_quality
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install Launchable CLI
+        run: |
+          pip install launchable pytest
+
+      - name: Record Build
+        run: launchable record build --name build-${{ github.run_id }}
+        env:
+          LAUNCHABLE_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN }}
+
+      - name: Subset Tests
+        run: |
+          launchable subset --target 90% --confidence high --base test/ > subset.txt
+        env:
+          LAUNCHABLE_TOKEN: ${{ secrets.LAUNCHABLE_TOKEN }}
+
+      - name: Run Subset Tests
+        run: |
+          xargs pytest < subset.txt
+
+  notify:
+    name: Slack Notification
+    runs-on: ubuntu-latest
+    needs: [code_quality, test_selection]
+    steps:
+      - name: Send Slack Notification
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "✅ AI CI Pipeline completed for *${{ github.repository }}* on branch *${{ github.ref }}*."
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
