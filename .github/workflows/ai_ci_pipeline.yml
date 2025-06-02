@@ -37,7 +37,7 @@ jobs:
 
       - name: Install Launchable CLI
         run: |
-          pip install "launchable<2.0.0" launchable pytest
+          pip install launchable==1.49.0 pytest
 
       - name: Record Build
         run: launchable record build --name build-${{ github.run_id }}
