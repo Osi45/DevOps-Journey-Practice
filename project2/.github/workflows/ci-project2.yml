@@ -1,4 +1,4 @@
-name: CI for Project 2
+name: CI Pipeline for Project 2
 
 on:
   push:
