@@ -66,6 +66,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          cd project2
           pip install -r project2/requirements.txt
 
       - name: Run Tests
