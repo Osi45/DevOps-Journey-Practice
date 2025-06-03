@@ -44,16 +44,14 @@ jobs:
         run: pytest
 
   notify:
-    name: Slack Notification
+    name: Send Slack Notification
     runs-on: ubuntu-latest
     needs: [code_quality, test_selection]
     steps:
-      - name: Send Slack Notification
+      - name: Notify Slack
         uses: slackapi/slack-github-action@v1.24.0
         with:
-          payload: |
-            {
-              "text": "✅ AI CI Pipeline completed for *${{ github.repository }}* on branch *${{ github.ref }}*."
-            }
+          channel-id: C08UY3DSQ2W
+          slack-message: "✅ CI pipeline completed!"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
