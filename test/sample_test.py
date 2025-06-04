@@ -1,6 +1,6 @@
 def test_pass():
-    assert 2 + 2 == 4
+    assert 5 + 5 == 10
 
 def test_fail():
-    assert 3 * 3 == 9 
+    assert 4 * 4 == 16 
 
