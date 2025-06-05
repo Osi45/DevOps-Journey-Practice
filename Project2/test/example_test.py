@@ -1,4 +1,4 @@
-from app import add
+from Project2.app import add
 
 def test_add():
     assert add(2, 3) == 5
