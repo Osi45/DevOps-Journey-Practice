@@ -4,7 +4,9 @@ This project demonstrates a CI/CD pipeline using GitHub Actions that integrates 
 
 ## Tools Used
 - GitHub Actions
-- AWS
+- Codacy
+- Npm Audit
+- Slack
 - YAML
 
 ## Folder Structure
