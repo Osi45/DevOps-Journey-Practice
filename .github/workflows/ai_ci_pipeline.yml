@@ -3,8 +3,12 @@ name: CI Pipeline for Project 1
 on:
   push:
     branches: [main]
+    paths:
+      - 'Project1/**'
   pull_request:
     branches: [main]
+    paths:
+      - 'Project1/**'
 
 jobs:
   code_quality:
