@@ -55,7 +55,7 @@ jobs:
       - name: Notify Slack
         uses: slackapi/slack-github-action@v1.24.0
         with:
-          channel-id: C08UY3DSQ2W
-          slack-message: "✅ CI pipeline duly completed and i am super happy!"
+          channel: "${{ secrets.SLACK_CHANNEL }}
+          slack-message: "✅ CI pipeline duly completed and i'm in an ecstatic mood!"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
