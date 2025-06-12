@@ -56,6 +56,6 @@ jobs:
         uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: ${{ secrets.SLACK_CHANNEL }}"
-          slack-message: "✅ CI pipeline duly completed and i'm very super happy!"
+          slack-message: "✅ CI pipeline duly completed and i feel super cool about it!"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
