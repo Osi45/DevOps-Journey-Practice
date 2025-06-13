@@ -5,10 +5,13 @@ on:
     branches: [ main ]
     paths:
       - 'Project2/**'
+      - '.github/workflows/ci_pipeline_project2.yml
+
   pull_request:
     branches: [ main ]
     paths:
       - 'Project2/**'
+      - '.github/workflows/ci_pipeline_project2.yml
 
 jobs:
   test-and-build:
