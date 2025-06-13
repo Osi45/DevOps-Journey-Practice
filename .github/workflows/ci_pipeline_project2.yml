@@ -42,7 +42,7 @@ jobs:
       continue-on-error: true
      
     - name: SonarCloud Scan
-      uses: Sonarsource/sonarcloud-githubactions-action@2
+      uses: Sonarsource/sonarcloud-githubaction-action@2
       with:
         projectBaseDir: ./Project2
       env:
