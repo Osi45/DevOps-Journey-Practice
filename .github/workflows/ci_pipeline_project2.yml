@@ -39,10 +39,19 @@ jobs:
     - name: Security Audit
       run: npm audit --audit-level=moderate
       working-directory: ./Project2
-      continue-on-error: true  
-      
+      continue-on-error: true
+
+    - name: Check SonarQube availability
+      id: check-sonar
+      run: |
+        if [ -n "${{ secrets.SONARQUBE_HOST }}" ]; then
+          echo "sonar_available=true" >> $GITHUB_OUTPUT
+        else
+          echo "sonar_available=false" >> $GITHUB_OUTPUT
+        fi
+     
     - name: SonarQube Scan
-      if: ${{ secrets.SONARQUBE_HOST != '' }}
+      if: steps.check-sonar.outputs.sonar_available == 'true'
       uses: sonarsource/sonarqube-scan-action@master
       env:
         SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
