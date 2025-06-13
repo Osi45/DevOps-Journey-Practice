@@ -45,9 +45,9 @@ jobs:
       id: check-sonar
       run: |
         if [ -n "${{ secrets.SONARQUBE_HOST }}" ]; then
-          echo "sonar_available=true" >> $GITHUB_OUTPUT
+          echo "sonar_available=true" >> "$GITHUB_OUTPUT"
         else
-          echo "sonar_available=false" >> $GITHUB_OUTPUT
+          echo "sonar_available=false" >> "$GITHUB_OUTPUT"
         fi
      
     - name: SonarQube Scan
