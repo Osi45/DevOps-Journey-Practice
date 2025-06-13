@@ -47,7 +47,6 @@ jobs:
       env:
         SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
         SONARQUBE_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
-      working-directory: ./Project2
 
   docker-build-and-deploy:
     needs: test-and-build
