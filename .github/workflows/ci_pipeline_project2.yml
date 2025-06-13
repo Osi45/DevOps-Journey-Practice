@@ -38,15 +38,11 @@ jobs:
       continue-on-error: true  
       
     - name: SonarQube Scan
-      if: ${{ secrets.SONARQUBE_HOST != '' }}
+      if: env.secrets.SONARQUBE_HOST != ''
       uses: sonarsource/sonarqube-scan-action@master
-      with:
-        args: >
-          -Dsonar.projectKey=quotes-api
-          -Dsonar.sources=app/
-          -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }}
-          -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}
-      continue-on-error: true
+      env:
+        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+        SONARQUBE_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
       
   docker-build-and-deploy:
     needs: test-and-build
