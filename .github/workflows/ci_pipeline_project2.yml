@@ -72,7 +72,6 @@ jobs:
       with:
         images: ${{ secrets.DOCKERHUB_USERNAME }}/devops-journey-practice
         tags: |
-          type=raw,value=latest
           type=ref,prefix=branch
           type=sha,prefix=main-
           
