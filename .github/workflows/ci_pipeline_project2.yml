@@ -12,6 +12,10 @@ on:
       - 'Project2/**'
       - '.github/workflows/ci_pipeline_project2.yml'
 
+permissions:
+  contents: read
+  scurity-events: write 
+
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
@@ -72,13 +76,13 @@ jobs:
       with:
         images: ${{ secrets.DOCKERHUB_USERNAME }}/devops-journey-practice
         tags: |
-          type=ref,prefix=branch
-          type=sha,prefix=main-
+          type=raw,value=latest
+          type=sha
           
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: ./Project
         platforms: linux/amd64,linux/arm64
         push: true
         tags: ${{ steps.meta.outputs.tags }}
@@ -91,14 +95,14 @@ jobs:
       with:
         image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/devops-journey-practice:latest
         format: 'sarif'
-        output: 'trivy-results.sarif'
+        output: './trivy-results.sarif'
       continue-on-error: true
       
     - name: Upload Trivy scan results
       uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
-        sarif_file: 'trivy-results.sarif'
+        sarif_file: './trivy-results.sarif'
       continue-on-error: true
       
     - name: Deploy to staging
