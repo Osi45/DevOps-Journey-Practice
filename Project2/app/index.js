@@ -9,6 +9,10 @@ let quotes = [
   "Simplicity is the ultimate sophistication."
 ];
 
+app.get('/', (req, res) => {
+  res.send('📚 Welcome to the Quotes API! Try GET /quotes or GET /quotes/all');
+});
+
 app.get('/quotes', (req, res) => {
   try {
     const randomIndex = Math.floor(Math.random() * quotes.length);
