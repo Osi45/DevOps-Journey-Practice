@@ -14,7 +14,7 @@ on:
 
 permissions:
   contents: read
-  scurity-events: write 
+  security-events: write 
 
 jobs:
   test-and-build:
