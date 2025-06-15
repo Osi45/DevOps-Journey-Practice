@@ -8,4 +8,4 @@ Welcome to my DevOps project portfolio! Each directory contains a hands-on proje
 - [Project2 - Node.js App + Github Actions CI/CD Pipeline](./Project2)
 - [Project3 - CI/CD with GitHub Actions](./Project3)
 
-Click into each folder to learn more!
+
