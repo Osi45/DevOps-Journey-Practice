@@ -1,0 +1,5 @@
+aws_region     = "us-east-1"
+instance_type  = "t2.micro"
+key_name       = "project3-key"
+ami_id         = "ami-020cba7c55df1f615"
+project_name   = "DevOps-Project3"
