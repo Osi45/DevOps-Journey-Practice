@@ -39,7 +39,7 @@ jobs:
         run: terraform init -reconfigure
 
       - name: Terraform Plan
-        run: terraform plan -var "ami-020cba7c55df1f615"
+        run: terraform plan -var "ami-020cba7c55df1f615" -out=tflan
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
