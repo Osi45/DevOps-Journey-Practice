@@ -96,6 +96,38 @@ resource "aws_instance" "web_app" {
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
 
+   user_data = <<-EOF
+    #!/bin/bash
+    sudo apt update -y
+    sudo apt install -y nodejs npm git curl
+
+    sudo npm install -g pm2
+
+    git clone https://github.com/YOUR_GITHUB/devops-journey-practice.git /home/ubuntu/app || true
+    cd /home/ubuntu/app/Project3/app
+    npm install
+    pm2 start index.js
+
+    wget https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-amd64.tar.gz
+    tar xvfz node_exporter-1.7.0.linux-amd64.tar.gz
+    sudo mv node_exporter-1.7.0.linux-amd64/node_exporter /usr/local/bin
+    sudo useradd -rs /bin/false nodeusr
+    sudo tee /etc/systemd/system/node_exporter.service > /dev/null << EOL
+    [Unit]
+    Description=Node Exporter
+    After=network.target
+    [Service]
+    User=nodeusr
+    ExecStart=/usr/local/bin/node_exporter
+    [Install]
+    WantedBy=default.target
+    EOL
+
+    sudo systemctl daemon-reload
+    sudo systemctl enable node_exporter
+    sudo systemctl start node_exporter
+  EOF
+
 tags = {
     Name = "${var.project_name}-web-app"
   }
@@ -107,6 +139,48 @@ resource "aws_instance" "monitoring" {
   key_name               = aws_key_pair.this.key_name
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
+  
+   user_data = <<-EOF
+    #!/bin/bash
+    sudo apt update -y
+    sudo apt install -y docker.io docker-compose git
+
+    sudo systemctl enable docker
+    sudo systemctl start docker
+
+    mkdir -p /opt/monitoring
+    cd /opt/monitoring
+
+    cat << EOL > docker-compose.yml
+    version: '3.7'
+
+    services:
+      prometheus:
+        image: prom/prometheus
+        container_name: prometheus
+        ports:
+          - "9090:9090"
+        volumes:
+          - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+      grafana:
+        image: grafana/grafana
+        container_name: grafana
+        ports:
+          - "3000:3000"
+    EOL
+
+    cat << EOL > prometheus.yml
+    global:
+      scrape_interval: 15s
+    scrape_configs:
+      - job_name: 'node_exporter_metrics'
+        static_configs:
+          - targets: ['${aws_instance.web_app.private_ip}:9100']
+    EOL
+
+    sudo docker-compose up -d
+  EOF
 
   tags = {
     Name = "${var.project_name}-monitoring"
@@ -116,4 +190,12 @@ resource "aws_instance" "monitoring" {
 output "private_key" {
   value     = tls_private_key.this.private_key_pem
   sensitive = true
+}
+
+output "web_app_public_ip" {
+  value = aws_instance.web_app.public_ip
+}
+
+output "monitoring_public_ip" {
+  value = aws_instance.monitoring.public_ip
 }
