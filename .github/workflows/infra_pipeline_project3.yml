@@ -1,4 +1,4 @@
-name: Infrastructure Pipeline for Project3
+name: CI Infrastructure Pipeline for Project3
 
 on:
   push:
