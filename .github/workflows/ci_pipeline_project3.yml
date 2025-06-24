@@ -4,13 +4,14 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'Project3/**'
+      - 'Project3/app/**'
       - '.github/workflows/ci_pipeline_project3.yml'
   pull_request:
     branches: [ main ]
     paths:
-      - 'Project3/**'
+      - 'Project3/app/**'
       - '.github/workflows/ci_pipeline_project3.yml'
+ workflow_dispatch:
 
 permissions:
   contents: read
