@@ -1,0 +1,5 @@
+Project3/terraform/.terraform/
+Project3/terraform/terraform.tfstate
+Project3/terraform/terraform.tfstate.backup
+Project3/terraform/tfplan
+Project3/app/node_modules
