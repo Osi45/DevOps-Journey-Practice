@@ -11,7 +11,8 @@ on:
     paths:
       - 'Project3/app/**'
       - '.github/workflows/ci_pipeline_project3.yml'
- workflow_dispatch:
+
+  workflow_dispatch:
 
 permissions:
   contents: read
