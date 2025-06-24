@@ -4,8 +4,8 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'Project3/terraform/**'
-      - '.github/workflows/infra_pipeline_project3.yml'
+      - 'Project3/terraform/**/*.tf'
+      - 'Project3/terraform/**/*.tfvars'
 
 permissions:
   contents: read
