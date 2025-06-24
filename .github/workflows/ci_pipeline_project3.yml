@@ -6,6 +6,7 @@ on:
     paths:
       - 'Project3/app/**'
       - '.github/workflows/ci_pipeline_project3.yml'
+
   pull_request:
     branches: [ main ]
     paths:
@@ -16,87 +17,96 @@ on:
 
 permissions:
   contents: read
-  security-events: write 
+  security-events: write
 
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: Project3/package-lock.json
-        
-    - name: Install dependencies
-      run: npm ci
-      working-directory: ./Project3
-      
-    - name: Run tests
-      run: npm test
-      working-directory: ./Project3
-      continue-on-error: true  
-      
-    - name: Security Audit
-      run: npm audit --audit-level=moderate
-      working-directory: ./Project3
-      continue-on-error: true
-     
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@v2
-      with:
-        projectBaseDir: ./Project3
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-   - name: Create SSH private key file
-      run: |
-        echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > private_key.pem
-        chmod 600 private_key.pem
-
-    - name: Deploy App to EC2 Web Instance
-      run: |
-        echo "Deploying app to EC2 instance..."
-        ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ secrets.WEB_APP_PUBLIC_IP }} "
-          sudo apt update -y &&
-          sudo apt install -y nodejs npm git pm2 &&
-          git clone https://github.com/YOUR_GITHUB/devops-journey-practice.git /home/ubuntu/app || true &&
-          cd /home/ubuntu/app/Project3/app &&
-          npm install &&
-          pm2 restart index.js || pm2 start index.j        
-        "
     steps:
-    - name: Slack Success Notification
-      if: success()
-      uses: slackapi/slack-github-action@v1.25.0
-      with:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: Project3/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./Project3
+
+      - name: Run tests
+        run: npm test
+        working-directory: ./Project3
+        continue-on-error: true
+
+      - name: Security Audit
+        run: npm audit --audit-level=moderate
+        working-directory: ./Project3
+        continue-on-error: true
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectBaseDir: ./Project3
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Create SSH private key file
+        run: |
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+
+      - name: Test SSH connection
+        run: |
+          echo "Testing SSH connection to EC2..."
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ secrets.WEB_APP_PUBLIC_IP }} "echo Connected!"
+
+      - name: Deploy App to EC2 Web Instance
+        run: |
+          echo "Deploying app to EC2 instance..."
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ secrets.WEB_APP_PUBLIC_IP }} "
+            sudo apt update -y &&
+            sudo apt install -y nodejs npm git pm2 &&
+            git clone https://github.com/osi45/devops-journey-practice.git /home/ubuntu/app || true &&
+            cd /home/ubuntu/app/Project3/app &&
+            npm install &&
+            pm2 restart index.js || pm2 start index.js
+          "
+     - name: Clean up SSH private key
+        run: |
+          echo "Cleaning up private key..."
+          rm -f private_key.pe     
+
+     - name: Slack Success Notification
+       if: success()
+       uses: slackapi/slack-github-action@v1.25.0
+       with:
         channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
         slack-message: |
           ✅ *Project3 Web App* deployment succeeded!
-          
-          *Branch:* ${{ github.ref_name }}
-          *Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>
-          *Actor:* ${{ github.actor }}
-      env:
+
+           *Branch:* ${{ github.ref_name }}
+           *Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>
+           *Actor:* ${{ github.actor }}
+       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-        
-    - name: Slack Failure Notification
-      if: failure()
-      uses: slackapi/slack-github-action@v1.25.0
-      with:
-        channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-        slack-message: |
-          ❌ *Project3 Web App* deployment failed!
-          
-          *Branch:* ${{ github.ref_name }}
-          *Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>
-          *Actor:* ${{ github.actor }}
-          
-          <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>
-      env:
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+     - name: Slack Failure Notification
+       if: failure()
+       uses: slackapi/slack-github-action@v1.25.0
+       with:
+         channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+         slack-message: |
+           ❌ *Project3 Web App* deployment failed!
+
+           *Branch:* ${{ github.ref_name }}
+           *Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>
+           *Actor:* ${{ github.actor }}
+
+           <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>
+       env:
+         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
