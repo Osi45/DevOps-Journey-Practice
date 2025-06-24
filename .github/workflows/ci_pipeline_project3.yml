@@ -13,7 +13,7 @@ on:
       - 'Project3/app/**'
       - '.github/workflows/ci_pipeline_project3.yml'
 
-  workflow_dispatch:
+  workflow_dispatch:  
 
 permissions:
   contents: read
@@ -76,37 +76,38 @@ jobs:
             npm install &&
             pm2 restart index.js || pm2 start index.js
           "
-     - name: Clean up SSH private key
+
+      - name: Clean up SSH private key
         run: |
           echo "Cleaning up private key..."
-          rm -f private_key.pe     
+          rm -f private_key.pem
 
-     - name: Slack Success Notification
-       if: success()
-       uses: slackapi/slack-github-action@v1.25.0
-       with:
-        channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-        slack-message: |
-          ✅ *Project3 Web App* deployment succeeded!
+      - name: Slack Success Notification
+        if: success()
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-message: |
+            ✅ *Project3 Web App* deployment succeeded!
 
-           *Branch:* ${{ github.ref_name }}
-           *Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>
-           *Actor:* ${{ github.actor }}
-       env:
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            *Branch:* ${{ github.ref_name }}
+            *Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>
+            *Actor:* ${{ github.actor }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-     - name: Slack Failure Notification
-       if: failure()
-       uses: slackapi/slack-github-action@v1.25.0
-       with:
-         channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-         slack-message: |
-           ❌ *Project3 Web App* deployment failed!
+      - name: Slack Failure Notification
+        if: failure()
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-message: |
+            ❌ *Project3 Web App* deployment failed!
 
-           *Branch:* ${{ github.ref_name }}
-           *Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>
-           *Actor:* ${{ github.actor }}
+            *Branch:* ${{ github.ref_name }}
+            *Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>
+            *Actor:* ${{ github.actor }}
 
-           <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>
-       env:
-         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
