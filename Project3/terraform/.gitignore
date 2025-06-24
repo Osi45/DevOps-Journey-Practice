@@ -4,3 +4,4 @@ echo 'terraform.tfstate' >> .gitignore
 echo 'terraform.tfstate.backup' >> .gitignore
 echo 'tfplan' >> .gitignore
 echo '*.tfvars' >> .gitignore
+.terraform/
