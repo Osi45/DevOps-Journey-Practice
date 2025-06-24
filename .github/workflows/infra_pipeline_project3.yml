@@ -6,7 +6,7 @@ on:
     paths:
       - 'Project3/terraform/**/*.tf'
       - 'Project3/terraform/**/*.tfvars'
-workflow_dispatch:
+  workflow_dispatch:
 
 permissions:
   contents: read
