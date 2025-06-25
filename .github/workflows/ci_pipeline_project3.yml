@@ -71,8 +71,8 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ secrets.WEB_APP_PUBLIC_IP }} "
             sudo apt update -y &&
             sudo apt install -y nodejs npm git pm2 &&
-            git clone https://github.com/osi45/devops-journey-practice.git /home/ubuntu/app || true &&
-            cd /home/ubuntu/app/Project3/app &&
+            git clone https://github.com/osi45/devops-journey-practice.git /home/ubuntu/devops || true &&
+            cd /home/ubuntu/devops/Project3/app &&
             npm install &&
             pm2 restart index.js || pm2 start index.js
           "
