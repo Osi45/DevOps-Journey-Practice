@@ -103,14 +103,14 @@ resource "aws_instance" "web_app" {
 
     sudo npm install -g pm2
 
-    git clone https://github.com/YOUR_GITHUB/devops-journey-practice.git /home/ubuntu/app || true
-    cd /home/ubuntu/app/Project3/app
-    npm install
-    pm2 start index.js
+    git clone https://github.com/Osi45/Devops-Journey-Practice.git /home/ubuntu/app || true
+    cd /home/ubuntu/app/Project3/app && npm install && pm2 start index.js || echo "App not found"
 
     wget https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-amd64.tar.gz
     tar xvfz node_exporter-1.7.0.linux-amd64.tar.gz
     sudo mv node_exporter-1.7.0.linux-amd64/node_exporter /usr/local/bin
+    rm -rf node_exporter-1.7.0.linux-amd64*
+
     sudo useradd -rs /bin/false nodeusr
     sudo tee /etc/systemd/system/node_exporter.service > /dev/null << EOL
     [Unit]
