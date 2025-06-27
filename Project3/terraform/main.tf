@@ -40,8 +40,10 @@ resource "aws_internet_gateway" "this" {
 
 resource "aws_eip" "web_app_eip" {
   instance = aws_instance.web_app.id
-  vpc      = true
-  depends_on = [aws_internet_gateway.this]
+
+  tags = {
+    Name = "${var.project_name}-eip"
+  }
 }
 
 resource "aws_route_table" "public" {
