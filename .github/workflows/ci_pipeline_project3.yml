@@ -73,8 +73,8 @@ jobs:
             sudo apt install -y nodejs npm git &&
             sudo npm install -g pm2 &&
             export PATH=\$PATH:/usr/local/bin &&
-            git clone https://github.com/Osi45/Devops-Journey-Practice.git /home/ubuntu/DevOps-Journey-Practice || true &&
-            cd /home/ubuntu/Devops-Journey-Practice/Project3/app &&
+            git clone https://github.com/Osi45/DevOps-Journey-Practice.git /home/ubuntu/DevOps-Journey-Practice || true &&
+            cd /home/ubuntu/DevOps-Journey-Practice/Project3/app &&
             npm install &&
             pm2 restart index.js || pm2 start index.js
           "
