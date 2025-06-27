@@ -38,6 +38,12 @@ resource "aws_internet_gateway" "this" {
   }
 }
 
+resource "aws_eip" "web_app_eip" {
+  instance = aws_instance.web_app.id
+  vpc      = true
+  depends_on = [aws_internet_gateway.this]
+}
+
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.this.id
 
@@ -72,6 +78,14 @@ resource "aws_security_group" "web_sg" {
     description = "HTTP"
     from_port   = 80
     to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "App Port"
+    from_port   = 3000
+    to_port     = 3000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
