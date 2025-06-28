@@ -12,6 +12,13 @@ resource "aws_key_pair" "this" {
   public_key = tls_private_key.this.public_key_openssh
 }
 
+resource "local_file" "private_key" {
+  content              = tls_private_key.this.private_key_pem
+  filename             = "${path.module}/project3-key.pem"
+  file_permission      = "0400"
+  directory_permission = "0700"
+}
+
 resource "aws_vpc" "this" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
@@ -73,7 +80,7 @@ resource "aws_security_group" "web_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["104.158.105.134/32"]
   }
 
   ingress {
