@@ -16,7 +16,6 @@ resource "local_file" "private_key" {
   content              = tls_private_key.this.private_key_pem
   filename             = "${path.module}/project3-key.pem"
   file_permission      = "0400"
-  directory_permission = "0700"
 }
 
 resource "aws_vpc" "this" {
