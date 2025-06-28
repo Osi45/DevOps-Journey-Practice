@@ -80,7 +80,7 @@ resource "aws_security_group" "web_sg" {
   to_port     = 22
   protocol    = "tcp"
   cidr_blocks = [
-    "104.158.105.134/32"
+    "104.158.105.134/32",
     "140.82.112.0/20"       
   ]
 }
