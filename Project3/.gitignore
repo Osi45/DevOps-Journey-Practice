@@ -4,3 +4,5 @@ Project3/terraform/terraform.tfstate.backup
 Project3/terraform/tfplan
 Project3/app/node_modules
 *.pem
+project3-key
+project3-key.pub
