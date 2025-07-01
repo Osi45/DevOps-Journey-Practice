@@ -5,3 +5,4 @@ echo 'terraform.tfstate.backup' >> .gitignore
 echo 'tfplan' >> .gitignore
 echo '*.tfvars' >> .gitignore
 .terraform/
+project3-key
