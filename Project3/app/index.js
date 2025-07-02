@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const PORT = 4000;
 
 app.use(express.json());
 
@@ -14,52 +15,14 @@ app.get('/', (req, res) => {
 });
 
 app.get('/quotes', (req, res) => {
-  try {
-    const randomIndex = Math.floor(Math.random() * quotes.length);
-    res.json({ quote: quotes[randomIndex] });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to retrieve quote' });
-  }
-});
-
-app.post('/quotes', (req, res) => {
-  try {
-    const { quote } = req.body;
-    
-    if (!quote || typeof quote !== 'string' || quote.trim().length === 0) {
-      return res.status(400).json({ error: 'Valid quote string is required' });
-    }
-    
-    const trimmedQuote = quote.trim();
-    quotes.push(trimmedQuote);
-    res.status(201).json({ 
-      message: 'Quote added successfully', 
-      quote: trimmedQuote,
-      totalQuotes: quotes.length 
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to add quote' });
-  }
+  const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+  res.send(randomQuote);
 });
 
 app.get('/quotes/all', (req, res) => {
-  try {
-    res.json({ quotes, total: quotes.length });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to retrieve quotes' });
-  }
+  res.json(quotes);
 });
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
-});
-
-const PORT = process.env.PORT || 4000;
-
-app.listen(PORT, '0.0.0', (err) => {
-  if (err) {
-    console.error('Failed to start server:', err);
-    process.exit(1);
-  }
-  console.log(`Quotes API running on port ${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
