@@ -76,7 +76,9 @@ jobs:
             git clone https://github.com/Osi45/DevOps-Journey-Practice.git /home/ubuntu/DevOps-Journey-Practice || true &&
             cd /home/ubuntu/DevOps-Journey-Practice/Project3/app &&
             npm install &&
-            pm2 restart index.js || pm2 start index.js
+            pm2 delete index || true &&
+            pm2 start index.js --name index &&
+            pm2 save
           "
 
       - name: Clean up SSH private key
