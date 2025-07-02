@@ -10,6 +10,7 @@ resource "aws_key_pair" "this" {
 resource "aws_vpc" "this" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
+
   tags = {
     Name = "${var.project_name}-vpc"
   }
@@ -25,19 +26,21 @@ resource "aws_subnet" "public" {
   }
 }
 
+resource "aws_subnet" "private" {
+  vpc_id                  = aws_vpc.this.id
+  cidr_block              = "10.0.2.0/24"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "${var.project_name}-private-subnet"
+  }
+}
+
 resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
 
   tags = {
     Name = "${var.project_name}-igw"
-  }
-}
-
-resource "aws_eip" "web_app_eip" {
-  instance = aws_instance.web_app.id
-
-  tags = {
-    Name = "${var.project_name}-eip"
   }
 }
 
@@ -64,11 +67,11 @@ resource "aws_security_group" "web_sg" {
   name   = "${var.project_name}-sg"
 
   ingress {
-  from_port   = 22
-  to_port     = 22
-  protocol    = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
-}
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   ingress {
     description = "HTTP"
@@ -99,6 +102,54 @@ resource "aws_security_group" "web_sg" {
   }
 }
 
+resource "aws_security_group" "monitoring_sg" {
+  vpc_id = aws_vpc.this.id
+  name   = "${var.project_name}-monitoring-sg"
+
+  ingress {
+    description     = "SSH from Web App"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    security_groups = [aws_security_group.web_sg.id]
+  }
+
+  ingress {
+    description     = "Prometheus"
+    from_port       = 9090
+    to_port         = 9090
+    protocol        = "tcp"
+    security_groups = [aws_security_group.web_sg.id]
+  }
+
+  ingress {
+    description     = "Grafana"
+    from_port       = 4000
+    to_port         = 4000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.web_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project_name}-monitoring-sg"
+  }
+}
+
+resource "aws_eip" "web_app_eip" {
+  instance = aws_instance.web_app.id
+
+  tags = {
+    Name = "${var.project_name}-eip"
+  }
+}
+
 resource "aws_instance" "web_app" {
   ami                    = var.ami_id
   instance_type          = var.instance_type
@@ -106,7 +157,7 @@ resource "aws_instance" "web_app" {
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
 
-   user_data = <<-EOF
+  user_data = <<-EOF
     #!/bin/bash
     sudo apt update -y
     sudo apt install -y nodejs npm git curl
@@ -138,19 +189,20 @@ resource "aws_instance" "web_app" {
     sudo systemctl start node_exporter
   EOF
 
-tags = {
+  tags = {
     Name = "${var.project_name}-web-app"
   }
 }
- 
+
 resource "aws_instance" "monitoring" {
-  ami                    = var.ami_id
-  instance_type          = var.instance_type
-  key_name               = aws_key_pair.this.key_name
-  subnet_id              = aws_subnet.public.id
-  vpc_security_group_ids = [aws_security_group.web_sg.id]
-  
-   user_data = <<-EOF
+  ami                         = var.ami_id
+  instance_type               = var.instance_type
+  key_name                    = aws_key_pair.this.key_name
+  subnet_id                   = aws_subnet.private.id
+  vpc_security_group_ids      = [aws_security_group.monitoring_sg.id]
+  associate_public_ip_address = false
+
+  user_data = <<-EOF
     #!/bin/bash
     sudo apt update -y
     sudo apt install -y docker.io docker-compose git
@@ -163,7 +215,6 @@ resource "aws_instance" "monitoring" {
 
     cat << EOL > docker-compose.yml
     version: '3.7'
-
     services:
       prometheus:
         image: prom/prometheus
@@ -177,7 +228,7 @@ resource "aws_instance" "monitoring" {
         image: grafana/grafana
         container_name: grafana
         ports:
-          - "3000:3000"
+          - "4000:4000"
     EOL
 
     cat << EOL > prometheus.yml
@@ -200,8 +251,3 @@ resource "aws_instance" "monitoring" {
 output "web_app_public_ip" {
   value = aws_instance.web_app.public_ip
 }
-
-output "monitoring_public_ip" {
-  value = aws_instance.monitoring.public_ip
-}
-# test trigger
