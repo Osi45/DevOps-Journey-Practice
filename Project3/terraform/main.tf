@@ -124,8 +124,8 @@ resource "aws_security_group" "monitoring_sg" {
 
   ingress {
     description     = "Grafana"
-    from_port       = 4000
-    to_port         = 4000
+    from_port       = 3000
+    to_port         = 3000
     protocol        = "tcp"
     security_groups = [aws_security_group.web_sg.id]
   }
