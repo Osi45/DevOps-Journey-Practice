@@ -1,5 +1,5 @@
 aws_region           = "us-east-1"
-project_name         = "project3
+project_name         = "project3"
 ami_id               = "ami-020cba7c55df1f615"
 instance_type        = "t2.micro"
 key_name             = "project3-key"
