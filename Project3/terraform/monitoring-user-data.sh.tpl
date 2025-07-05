@@ -37,7 +37,7 @@ services:
     image: grafana/grafana
     container_name: grafana
     ports:
-      - "4000:4000"
+      - "3000:3000"
 EOL
 
 cat <<'EOL' > prometheus.yml
