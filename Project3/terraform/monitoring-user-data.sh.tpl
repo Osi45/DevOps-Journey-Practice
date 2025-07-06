@@ -23,6 +23,27 @@ sudo systemctl start docker
 mkdir -p /opt/monitoring
 cd /opt/monitoring
 
+cat <<EOL > docker-compose.yml
+version: '3.7'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+
+
 cat <<'EOL' > docker-compose.yml
 version: '3.7'
 services:
