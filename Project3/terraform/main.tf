@@ -89,7 +89,6 @@ resource "aws_route_table_association" "private_assoc" {
   route_table_id = aws_route_table.private_rt.id
 }
 
-# Security Group
 resource "aws_security_group" "web_sg" {
   name        = "${var.project_name}-sg"
   description = "Allow web, SSH, and monitoring traffic"
@@ -99,7 +98,7 @@ resource "aws_security_group" "web_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # SSH to web instance (bastion)
+    cidr_blocks = ["192.168.4.67/32"] 
   }
 
   ingress {
@@ -159,14 +158,14 @@ resource "aws_security_group" "monitoring_sg" {
     from_port   = 5601
     to_port     = 5601
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Kibana
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
     from_port   = 9200
     to_port     = 9200
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Elasticsearch
+    cidr_blocks = ["0.0.0.0/0"] 
   }
 
   egress {
