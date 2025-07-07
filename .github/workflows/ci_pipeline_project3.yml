@@ -13,14 +13,14 @@ on:
       - 'Project3/app/**'
       - '.github/workflows/ci_pipeline_project3.yml'
 
-  workflow_dispatch:  
+  workflow_dispatch:
 
 permissions:
   contents: read
   security-events: write
 
 jobs:
-  test-and-build:
+  test-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -55,37 +55,36 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Create SSH private key file
-        run: |
-          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > private_key.pem
-          chmod 600 private_key.pem
+      # 🔐 Configure AWS Credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
-      - name: Test SSH connection
+      # 🚀 Deploy via AWS Systems Manager (SSM)
+      - name: Deploy app using SSM
         run: |
-          echo "Testing SSH connection to EC2..."
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ secrets.WEB_APP_PUBLIC_IP }} "echo Connected!"
+          aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --instance-ids ${{ secrets.WEB_APP_INSTANCE_ID }} \
+            --comment "Deploy Node.js app via SSM" \
+            --parameters 'commands=[
+              "sudo apt update -y",
+              "sudo apt install -y nodejs npm git",
+              "sudo npm install -g pm2",
+              "git clone https://github.com/Osi45/DevOps-Journey-Practice.git /home/ubuntu/DevOps-Journey-Practice || true",
+              "cd /home/ubuntu/DevOps-Journey-Practice/Project3/app",
+              "npm install",
+              "pm2 delete index || true",
+              "pm2 start index.js --name index",
+              "pm2 save"
+            ]' \
+            --region us-east-1 \
+            --output text
 
-      - name: Deploy App to EC2 Web Instance
-        run: |
-          echo "Deploying app to EC2 instance..."
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ secrets.WEB_APP_PUBLIC_IP }} "
-            sudo apt update -y &&
-            sudo apt install -y nodejs npm git &&
-            sudo npm install -g pm2 &&
-            export PATH=\$PATH:/usr/local/bin &&
-            git clone https://github.com/Osi45/DevOps-Journey-Practice.git /home/ubuntu/DevOps-Journey-Practice || true &&
-            cd /home/ubuntu/DevOps-Journey-Practice/Project3/app &&
-            npm install &&
-            pm2 delete index || true &&
-            pm2 start index.js --name index &&
-            pm2 save
-          "
-
-      - name: Clean up SSH private key
-        run: |
-          echo "Cleaning up private key..."
-          rm -f private_key.pem
-
+      # ✅ Slack Success Notification
       - name: Slack Success Notification
         if: success()
         uses: slackapi/slack-github-action@v1.25.0
@@ -100,6 +99,7 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
+      # ❌ Slack Failure Notification
       - name: Slack Failure Notification
         if: failure()
         uses: slackapi/slack-github-action@v1.25.0
