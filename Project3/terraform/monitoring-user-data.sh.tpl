@@ -3,6 +3,8 @@
 sudo apt update -y
 sudo apt install -y docker.io docker-compose unzip wget curl
 
+sudo usermod -aG docker ubuntu
+
 mkdir -p /opt/monitoring
 cd /opt/monitoring
 

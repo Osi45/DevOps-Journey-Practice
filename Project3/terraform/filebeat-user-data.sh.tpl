@@ -1,6 +1,11 @@
 #!/bin/bash
+
 sudo apt update -y
-sudo apt install -y wget curl unzip
+sudo apt install -y wget curl unzip snapd
+
+sudo snap install amazon-ssm-agent --classic
+sudo systemctl enable amazon-ssm-agent
+sudo systemctl start amazon-ssm-agent
 
 sudo useradd -rs /bin/false node_exporter
 cd /opt
