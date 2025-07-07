@@ -1,73 +1,101 @@
 #!/bin/bash
-set -e
 
-sudo apt-get update -y
-sudo apt-get install -y ca-certificates curl gnupg lsb-release git
-
-sudo mkdir -p /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-  gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
-  https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-sudo apt-get update -y
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-
-sudo systemctl enable docker
-sudo systemctl start docker
+sudo apt update -y
+sudo apt install -y docker.io docker-compose unzip wget curl
 
 mkdir -p /opt/monitoring
 cd /opt/monitoring
 
-cat <<EOL > docker-compose.yml
-version: '3.7'
-services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
-    container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-    ports:
-      - "9200:9200"
+cat <<EOF > prometheus.yml
+global:
+  scrape_interval: 15s
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.0
-    container_name: kibana
-    ports:
-      - "5601:5601"
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+rule_files:
+  - "alerts.yml"
 
+scrape_configs:
+  - job_name: "node_exporter_metrics"
+    static_configs:
+      - targets: ["${web_app_private_ip}:9100"]
+EOF
 
-cat <<'EOL' > docker-compose.yml
-version: '3.7'
+cat <<EOF > alerts.yml
+groups:
+  - name: instance-down
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ \$labels.instance }} is down"
+          description: "{{ \$labels.instance }} has been unreachable for 1 minute."
+EOF
+
+mkdir -p grafana/provisioning/dashboards
+mkdir -p grafana/provisioning/datasources
+mkdir -p dashboards
+
+cat <<EOF > grafana/provisioning/datasources/datasource.yml
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+EOF
+
+cat <<EOF > grafana/provisioning/dashboards/dashboard.yml
+apiVersion: 1
+
+providers:
+  - name: 'default'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    options:
+      path: /var/lib/grafana/dashboards
+EOF
+
+wget -O dashboards/node_exporter_full.json https://grafana.com/api/dashboards/1860/revisions/33/download
+
+cat <<EOF > docker-compose.yml
+version: "3"
 services:
   prometheus:
     image: prom/prometheus
-    container_name: prometheus
     ports:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./alerts.yml:/etc/prometheus/alerts.yml
+
   grafana:
     image: grafana/grafana
-    container_name: grafana
     ports:
       - "3000:3000"
-EOL
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./dashboards:/var/lib/grafana/dashboards
 
-cat <<'EOL' > prometheus.yml
-global:
-  scrape_interval: 15s
-scrape_configs:
-  - job_name: 'node_exporter_metrics'
-    static_configs:
-      - targets: ['${web_app_private_ip}:9100']
-EOL
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
 
-sudo docker compose up -d
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.14.0
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+EOF
+
+docker compose up -d
