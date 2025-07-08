@@ -3,6 +3,10 @@
 sudo apt update -y
 sudo apt install -y docker.io docker-compose unzip wget curl
 
+sudo snap install amazon-ssm-agent --classic
+sudo systemctl enable amazon-ssm-agent
+sudo systemctl restart amazon-ssm-agent || sudo systemctl start amazon-ssm-agent
+
 sudo usermod -aG docker ubuntu
 
 mkdir -p /opt/monitoring

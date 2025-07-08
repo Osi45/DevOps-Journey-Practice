@@ -5,7 +5,7 @@ sudo apt install -y wget curl unzip snapd
 
 sudo snap install amazon-ssm-agent --classic
 sudo systemctl enable amazon-ssm-agent
-sudo systemctl start amazon-ssm-agent
+sudo systemctl restart amazon-ssm-agent || sudo systemctl start amazon-ssm-agent
 
 sudo useradd -rs /bin/false node_exporter
 cd /opt
