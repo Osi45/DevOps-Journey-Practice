@@ -55,7 +55,6 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      # 🔐 Configure AWS Credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -63,7 +62,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # 🚀 Deploy via AWS Systems Manager (SSM)
       - name: Deploy app using SSM
         run: |
           aws ssm send-command \
@@ -84,7 +82,6 @@ jobs:
             --region us-east-1 \
             --output text
 
-      # ✅ Slack Success Notification
       - name: Slack Success Notification
         if: success()
         uses: slackapi/slack-github-action@v1.25.0
@@ -92,14 +89,12 @@ jobs:
           channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
           slack-message: |
             ✅ *Project3 Web App* deployment succeeded!
-
             *Branch:* ${{ github.ref_name }}
             *Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>
             *Actor:* ${{ github.actor }}
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      # ❌ Slack Failure Notification
       - name: Slack Failure Notification
         if: failure()
         uses: slackapi/slack-github-action@v1.25.0
@@ -107,11 +102,9 @@ jobs:
           channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
           slack-message: |
             ❌ *Project3 Web App* deployment failed!
-
             *Branch:* ${{ github.ref_name }}
             *Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>
             *Actor:* ${{ github.actor }}
-
             <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
