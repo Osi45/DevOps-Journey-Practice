@@ -32,26 +32,26 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: ./project3/package-lock.json
+          cache-dependency-path: project3/package-lock.json
 
       - name: Install dependencies
         run: npm ci
-        working-directory: ./project3
+        working-directory: project3
 
       - name: Run tests
         run: npm test
-        working-directory: ./project3
+        working-directory: project3
         continue-on-error: true
 
       - name: Security Audit
         run: npm audit --audit-level=moderate
-        working-directory: ./project3
+        working-directory: project3
         continue-on-error: true
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         with:
-          projectBaseDir: ./project3
+          projectBaseDir: project3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
