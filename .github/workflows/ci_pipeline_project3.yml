@@ -32,26 +32,26 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: ./Project3/package-lock.json
+          cache-dependency-path: ./project3/package-lock.json
 
       - name: Install dependencies
         run: npm ci
-        working-directory: ./Project3
+        working-directory: ./project3
 
       - name: Run tests
         run: npm test
-        working-directory: ./Project3
+        working-directory: ./project3
         continue-on-error: true
 
       - name: Security Audit
         run: npm audit --audit-level=moderate
-        working-directory: ./Project3
+        working-directory: ./project3
         continue-on-error: true
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         with:
-          projectBaseDir: ./Project3
+          projectBaseDir: ./project3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
@@ -75,7 +75,7 @@ jobs:
               "cd /home/ubuntu",
               "rm -rf DevOps-Journey-Practice",
               "git clone https://github.com/Osi45/DevOps-Journey-Practice.git",
-              "cd DevOps-Journey-Practice/Project3/app",
+              "cd DevOps-Journey-Practice/project3/app",
               "npm install",
               "pm2 delete index || true",
               "pm2 start index.js --name index",
