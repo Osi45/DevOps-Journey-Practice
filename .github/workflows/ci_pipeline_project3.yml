@@ -24,54 +24,51 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: �� Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🔍 Debug: Check for package-lock.json
-        run: ls -l project3/package-lock.json
-
-      - name: 🧰 Set up Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
           cache-dependency-path: project3/package-lock.json
 
-      - name: 📦 Install dependencies
+      - name: Install dependencies
         run: npm ci
-        working-directory: ./project3
+        working-directory: project3
 
-      - name: 🧪 Run tests
+      - name: Run tests
         run: npm test
-        working-directory: ./project3
+        working-directory: project3
         continue-on-error: true
 
-      - name: 🔐 Security Audit
+      - name: Security Audit
         run: npm audit --audit-level=moderate
-        working-directory: ./project3
+        working-directory: project3
         continue-on-error: true
 
-      - name: 📊 SonarCloud Scan
+      - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         with:
-          projectBaseDir: ./project3
+          projectBaseDir: project3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: 🔐 Configure AWS credentials
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: 🚀 Deploy app using SSM
+      - name: Deploy app using SSM
         run: |
           aws ssm send-command \
             --document-name "AWS-RunShellScript" \
             --instance-ids ${{ secrets.WEB_APP_INSTANCE_ID }} \
             --comment "Deploy Node.js app via SSM" \
-            --parameters 'commands=[
+            --parameters commands='[
               "sudo apt update -y",
               "sudo apt install -y nodejs npm git",
               "sudo npm install -g pm2",
@@ -85,7 +82,7 @@ jobs:
             --region us-east-1 \
             --output text
 
-      - name: ✅ Slack Success Notification
+      - name: Slack Success Notification
         if: success()
         uses: slackapi/slack-github-action@v1.25.0
         with:
@@ -98,7 +95,7 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      - name: ❌ Slack Failure Notification
+      - name: Slack Failure Notification
         if: failure()
         uses: slackapi/slack-github-action@v1.25.0
         with:
@@ -107,6 +104,7 @@ jobs:
             ❌ *Project3 Web App* deployment failed!
             *Branch:* ${{ github.ref_name }}
             *Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>
+            *Actor:* ${{ github.actor }}
             <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
