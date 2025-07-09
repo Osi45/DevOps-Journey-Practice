@@ -62,7 +62,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Deploy app using SSM
+      - name: Deploy Node.js App via SSM
         run: |
           aws ssm send-command \
             --document-name "AWS-RunShellScript" \
@@ -72,8 +72,10 @@ jobs:
               "sudo apt update -y",
               "sudo apt install -y nodejs npm git",
               "sudo npm install -g pm2",
-              "git clone https://github.com/Osi45/DevOps-Journey-Practice.git /home/ubuntu/DevOps-Journey-Practice || true",
-              "cd /home/ubuntu/DevOps-Journey-Practice/Project3/app",
+              "cd /home/ubuntu",
+              "rm -rf DevOps-Journey-Practice",
+              "git clone https://github.com/Osi45/DevOps-Journey-Practice.git",
+              "cd DevOps-Journey-Practice/Project3/app",
               "npm install",
               "pm2 delete index || true",
               "pm2 start index.js --name index",
@@ -89,6 +91,7 @@ jobs:
           channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
           slack-message: |
             ✅ *Project3 Web App* deployment succeeded!
+
             *Branch:* ${{ github.ref_name }}
             *Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>
             *Actor:* ${{ github.actor }}
@@ -102,9 +105,11 @@ jobs:
           channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
           slack-message: |
             ❌ *Project3 Web App* deployment failed!
+
             *Branch:* ${{ github.ref_name }}
             *Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>
             *Actor:* ${{ github.actor }}
+
             <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
