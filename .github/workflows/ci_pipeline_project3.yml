@@ -68,7 +68,7 @@ jobs:
             --document-name "AWS-RunShellScript" \
             --instance-ids ${{ secrets.WEB_APP_INSTANCE_ID }} \
             --comment "Deploy Node.js app via SSM" \
-            --parameters commands='[
+            --parameters 'commands= [
               "sudo apt update -y",
               "sudo apt install -y nodejs npm git",
               "sudo npm install -g pm2",
