@@ -45,13 +45,13 @@ jobs:
 
       - name: Security Audit
         run: npm audit --audit-level=moderate
-        working-directory: ./project3
+        working-directory: ./Project3
         continue-on-error: true
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         with:
-          projectBaseDir: ./project3
+          projectBaseDir: ./Project3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
