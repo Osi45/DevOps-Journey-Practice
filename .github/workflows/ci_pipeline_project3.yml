@@ -72,8 +72,10 @@ jobs:
               "sudo apt update -y",
               "sudo apt install -y nodejs npm git",
               "sudo npm install -g pm2",
+              "rm -rf /home/ubuntu/DevOps-Journey-Practice",
               "git clone https://github.com/Osi45/DevOps-Journey-Practice.git /home/ubuntu/DevOps-Journey-Practice || true",
               "cd /home/ubuntu/DevOps-Journey-Practice/Project3/app",
+              "test -f index.js || { echo \"index.js not found. Exiting.\"; exit 1; }"
               "npm install",
               "pm2 delete index || true",
               "pm2 start index.js --name index",
