@@ -7,7 +7,7 @@ resource "aws_security_group" "web_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["192.168.4.67/32"] 
+    cidr_blocks = ["104.158.105.134/32"] 
   }
 
   ingress {
@@ -21,7 +21,7 @@ resource "aws_security_group" "web_sg" {
     from_port   = 4000
     to_port     = 4000
     protocol    = "tcp"
-    cidr_blocks = ["192.168.4.67/32"]  
+    cidr_blocks = ["104.158.105.134/32"]  
   }
 
   egress {
@@ -59,14 +59,14 @@ resource "aws_security_group" "monitoring_sg" {
     from_port   = 5601
     to_port     = 5601
     protocol    = "tcp"
-    cidr_blocks = ["192.168.4.67/32"]  
+    cidr_blocks = ["104.158.105.134/32"]  
   }
 
   ingress {
     from_port   = 9200
     to_port     = 9200
     protocol    = "tcp"
-    cidr_blocks = ["192.168.4.67/32"]
+    cidr_blocks = ["104.158.105.134/32"]
   }
 
   egress {
