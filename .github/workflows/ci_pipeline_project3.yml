@@ -73,7 +73,7 @@ jobs:
               "sudo apt install -y nodejs npm git",
               "sudo npm install -g pm2",
               "rm -rf /home/ubuntu/DevOps-Journey-Practice",
-              "git clone https://github.com/Osi45/DevOps-Journey-Practice.git /home/ubuntu/DevOps-Journey-Practice || true",
+              "git clone https://github.com/Osi45/DevOps-Journey-Practice.git /home/ubuntu/DevOps-Journey-Practice",
               "cd /home/ubuntu/DevOps-Journey-Practice/Project3/app",
               "test -f index.js || { echo \"index.js not found. Exiting.\"; exit 1; }"
               "npm install",
