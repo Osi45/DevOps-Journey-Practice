@@ -75,7 +75,7 @@ jobs:
               "rm -rf /home/ubuntu/DevOps-Journey-Practice",
               "git clone https://github.com/Osi45/DevOps-Journey-Practice.git /home/ubuntu/DevOps-Journey-Practice",
               "cd /home/ubuntu/DevOps-Journey-Practice/Project3/app",
-              "test -f index.js || { echo \"index.js not found. Exiting.\"; exit 1; }"
+              "test -f index.js || { echo \"index.js not found. Exiting.\"; exit 1; }",
               "npm install",
               "pm2 delete index || true",
               "pm2 start index.js --name index",
