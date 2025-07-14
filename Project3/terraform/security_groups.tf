@@ -4,24 +4,10 @@ resource "aws_security_group" "web_sg" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["104.158.105.134/32"] 
-  }
-
-  ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 9100
-    to_port     = 9100
-    protocol    = "tcp"
-    cidr_blocks = [aws_security_group.monitoring_sg.id]  
   }
 
   ingress {
@@ -70,10 +56,10 @@ resource "aws_security_group" "monitoring_sg" {
   }
 
   ingress {
-    from_port       = 9200
-    to_port         = 9200
-    protocol        = "tcp"
-    security_groups = [aws_security_group.web_sg.id]
+    from_port   = 9200
+    to_port     = 9200
+    protocol    = "tcp"
+    cidr_blocks = ["104.158.105.134/32"]
   }
 
   egress {
