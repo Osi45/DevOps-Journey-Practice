@@ -94,3 +94,13 @@ resource "aws_security_group" "monitoring_sg" {
     Name = "${var.project_name}-monitoring-sg"
   }
 }
+
+resource "aws_security_group_rule" "allow_node_exporter_scrape" {
+  type                     = "ingress"
+  from_port                = 9100
+  to_port                  = 9100
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.web_sg.id
+  source_security_group_id = aws_security_group.monitoring_sg.id
+  description              = "Allow Prometheus to scrape Node Exporter metrics"
+}
