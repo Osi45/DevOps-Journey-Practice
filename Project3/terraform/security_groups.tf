@@ -35,46 +35,38 @@ resource "aws_security_group" "monitoring_sg" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port                = 9090
-    to_port                  = 9090
-    protocol                 = "tcp"
-    source_security_group_id = aws_security_group.web_sg.id
-    description              = "Allow Prometheus from web app"
+    from_port   = 9090
+    to_port     = 9090
+    protocol    = "tcp"
+    cidr_blocks = ["65.92.152.43/32"]
   }
-
 
   ingress {
-    from_port                = 5601
-    to_port                  = 5601
-    protocol                 = "tcp"
-    source_security_group_id = aws_security_group.web_sg.id
-    description              = "Allow Kibana from web app"
+    from_port   = 5601
+    to_port     = 5601
+    protocol    = "tcp"
+    cidr_blocks = ["65.92.152.43/32"]
   }
-
 
   ingress {
-    from_port                = 3000
-    to_port                  = 3000
-    protocol                 = "tcp"
-    source_security_group_id = aws_security_group.web_sg.id
-    description              = "Allow Grafana from web app"
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = ["65.92.152.43/32"]
   }
-
 
   ingress {
-    from_port                = 9200
-    to_port                  = 9200
-    protocol                 = "tcp"
-    source_security_group_id = aws_security_group.web_sg.id
-    description              = "Allow Elasticsearch from web app"
+    from_port   = 9200
+    to_port     = 9200
+    protocol    = "tcp"
+    cidr_blocks = ["65.92.152.43/32"]
   }
-
 
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]  
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
@@ -87,7 +79,7 @@ resource "aws_security_group_rule" "allow_node_exporter_scrape" {
   from_port                = 9100
   to_port                  = 9100
   protocol                 = "tcp"
-  security_group_id        = aws_security_group.web_sg.id
-  source_security_group_id = aws_security_group.monitoring_sg.id
+  security_group_id        = aws_security_group.monitoring_sg.id
+  source_security_group_id = aws_security_group.web_sg.id
   description              = "Allow Prometheus to scrape Node Exporter metrics"
 }
