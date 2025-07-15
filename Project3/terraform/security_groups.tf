@@ -35,32 +35,40 @@ resource "aws_security_group" "monitoring_sg" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port   = 9090
-    to_port     = 9090
-    protocol    = "tcp"
-    cidr_blocks = ["65.92.152.43/32"]  
+    from_port                = 9090
+    to_port                  = 9090
+    protocol                 = "tcp"
+    source_security_group_id = aws_security_group.web_sg.id
+    description              = "Allow Prometheus from web app"
   }
 
-  ingress {
-    from_port   = 5601
-    to_port     = 5601
-    protocol    = "tcp"
-    cidr_blocks = ["65.92.152.43/32"]  
-  }
 
   ingress {
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
-    cidr_blocks = ["65.92.152.43/32"]
+    from_port                = 5601
+    to_port                  = 5601
+    protocol                 = "tcp"
+    source_security_group_id = aws_security_group.web_sg.id
+    description              = "Allow Kibana from web app"
   }
 
+
   ingress {
-    from_port   = 9200
-    to_port     = 9200
-    protocol    = "tcp"
-    cidr_blocks = ["65.92.152.43/32"]
+    from_port                = 3000
+    to_port                  = 3000
+    protocol                 = "tcp"
+    source_security_group_id = aws_security_group.web_sg.id
+    description              = "Allow Grafana from web app"
   }
+
+
+  ingress {
+    from_port                = 9200
+    to_port                  = 9200
+    protocol                 = "tcp"
+    source_security_group_id = aws_security_group.web_sg.id
+    description              = "Allow Elasticsearch from web app"
+  }
+
 
   egress {
     from_port   = 0
