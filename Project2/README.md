@@ -1,9 +1,7 @@
-📚 Project2: Quotes API — DevOps Journey Practice
+📚 Project 2: Quotes API — DevOps Journey Practice
 
-✅ Project Goal  
-I designed and implemented a simple Node.js API → contaiarize with Docker → automte testing, build and deployed with GitHub Actions → intgerated SonarQube, Npm audit and Trivy for security scanning.
-
----
+✅ Project Goal
+I designed and implemented a simple Node.js API → containerized with Docker → automated testing, build, and deployment with GitHub Actions → integrated SonarQube, npm audit, and Trivy for security scanning.
 
 🗂️ Project Structure
 
