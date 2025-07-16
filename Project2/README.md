@@ -1,11 +1,11 @@
-# 📚 Project2: Quotes API — DevOps Journey Practice
+📚 Project2: Quotes API — DevOps Journey Practice
 
-## ✅ Project Goal  
-Create a simple Node.js API → containerize with Docker → automate testing, build, and deploy with GitHub Actions → integrate SonarQube and security scanning.
+✅ Project Goal  
+I designed and implemented a simple Node.js API → containerizd with Docker → automatd testing, built, and deployed with GitHub Actions → integted SonarQube, Npm audit and Trivy for security scanning.
 
 ---
 
-## 🗂️ Project Structure
+🗂️ Project Structure
 
 DevOps-Journey-Practice/
 ├── .github/                          
@@ -26,7 +26,7 @@ DevOps-Journey-Practice/
 
 ---
 
-## 🛠️ Tools & Technologies
+🛠️ Tools & Technologies
 
 | Tool           | Purpose                               |
 |----------------|---------------------------------------|
@@ -39,7 +39,7 @@ DevOps-Journey-Practice/
 
 ---
 
-## 📋 Main Files
+📋 Main Files
 
 | File                      | Purpose                      |
 |---------------------------|------------------------------|
@@ -52,9 +52,8 @@ DevOps-Journey-Practice/
 | `sonar-project.properties`| SonarQube config              |
 | `README.md`               | Project documentation        |
 
----
 
- 🚀 Step-by-Step Git Commands
+🚀 Step-by-Step Git Commands
 
 1️⃣ Clone the repo:
 
