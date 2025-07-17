@@ -94,8 +94,8 @@ receivers:
   - name: 'slack-notifications'
     slack_configs:
       - send_resolved: true
-        token: '\${SLACK_BOT_TOKEN}'
-        channel: '\${SLACK_CHANNEL_ID
+        token: '${SLACK_BOT_TOKEN}'
+        channel: '${SLACK_CHANNEL_ID}'
 
 EOF
 
