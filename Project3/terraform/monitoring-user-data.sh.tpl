@@ -2,7 +2,7 @@
 
 # Update and install required packages
 sudo apt update -y
-sudo apt install -y docker.io unzip wget curl jq 
+sudo apt install -y docker.io unzip wget curl  
 
 # Install Docker Compose
 sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.7/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -101,8 +101,7 @@ receivers:
   - name: 'slack-notifications'
     slack_configs:
       - send_resolved: true
-        token: '${SLACK_BOT_TOKEN}'
-        channel: '${SLACK_CHANNEL_ID}'
+        SLACK_WEBHOOK_URL: "${SLACK_WEBHOOK_URL}"
 EOF
 
 # Grafana provisioning
@@ -164,8 +163,7 @@ services:
     ports:
       - "9093:9093"
     environment:
-      SLACK_BOT_TOKEN: "\${SLACK_BOT_TOKEN}"
-      SLACK_CHANNEL_ID: "\${SLACK_CHANNEL_ID}"
+      SLACK_WEBHOOK_URL: "${SLACK_WEBHOOK_URL}"
     networks:
       - monitoring_net
 
