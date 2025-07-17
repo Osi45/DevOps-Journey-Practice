@@ -89,7 +89,10 @@ global:
   resolve_timeout: 5m
 
 route:
-  receiver: 'slack-notifications'
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 1h
+  receiver: 'slack-notifications
 
 receivers:
   - name: 'slack-notifications'
@@ -139,56 +142,18 @@ wget -O dashboards/node_exporter_full.json https://grafana.com/api/dashboards/18
 
 # Docker Compose configuration
 cat <<EOF > docker-compose.yml
-version: "3"
+version: "3.8"
+
 services:
   prometheus:
     image: prom/prometheus
-    ports:
-      - "9090:9090"
+    container_name: prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - ./alerts.yml:/etc/prometheus/alerts.yml
-
-  alertmanager:
-    image: prom/alertmanager
-    ports:
-      - "9093:9093"
-    volumes:
-      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
     command:
-      - "--config.file=/etc/alertmanager/alertmanager.yml"
-
-  grafana:
-    image: grafana/grafana
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./dashboards:/var/lib/grafana/dashboards
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
-    environment:
-      - discovery.type=single-node
-    ports:
-      - "9200:9200"
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.14.0
-    ports:
-      - "5601:5601"
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-
-networks:
-  monitoring_net:
-
-services:
-  prometheus:
-    image: prom/prometheus
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./alert.rules.yml:/etc/prometheus/alert.rules.yml
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.enable-lifecycle'
     ports:
       - "9090:9090"
     networks:
@@ -196,19 +161,50 @@ services:
 
   alertmanager:
     image: prom/alertmanager
+    container_name: alertmanager
     volumes:
       - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
     ports:
       - "9093:9093"
+    environment:
+      SLACK_BOT_TOKEN: "\${SLACK_BOT_TOKEN}"
+      SLACK_CHANNEL_ID: "\${SLACK_CHANNEL_ID}"
     networks:
       - monitoring_net
 
-  node_exporter:
-    image: prom/node-exporter
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
     ports:
-      - "9100:9100"
+      - "3000:3000"
     networks:
-      - monitoring_net  
+      - monitoring_net
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    networks:
+      - monitoring_net
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.2
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - monitoring_net
+
+networks:
+  monitoring_net:
   
 EOF
 
