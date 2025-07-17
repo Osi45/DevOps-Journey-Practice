@@ -37,6 +37,7 @@ scrape_configs:
   - job_name: "node_exporter_metrics"
     static_configs:
       - targets: ["${WEB_APP_IP}:9100"]
+
 EOF
 
 # Prometheus alerting rules
@@ -114,6 +115,7 @@ datasources:
     access: proxy
     url: http://prometheus:9090
     isDefault: true
+
 EOF
 
 # Grafana dashboard provisioning
@@ -129,6 +131,7 @@ providers:
     updateIntervalSeconds: 10
     options:
       path: /var/lib/grafana/dashboards
+
 EOF
 
 # Download a sample Grafana dashboard
@@ -176,6 +179,37 @@ services:
       - "5601:5601"
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+
+networks:
+  monitoring_net:
+
+services:
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./alert.rules.yml:/etc/prometheus/alert.rules.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring_net
+
+  alertmanager:
+    image: prom/alertmanager
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    ports:
+      - "9093:9093"
+    networks:
+      - monitoring_net
+
+  node_exporter:
+    image: prom/node-exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - monitoring_net  
+  
 EOF
 
 # Start the monitoring stack
