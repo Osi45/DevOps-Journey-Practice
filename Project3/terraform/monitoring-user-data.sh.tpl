@@ -41,7 +41,7 @@ rule_files:
 scrape_configs:
   - job_name: "node_exporter_metrics"
     static_configs:
-      - targets: ["${WEB_APP_IP}:9100"]
+      - targets: ["${web_app_private_ip}:9100"]
 EOF
 
 # Alerting rules
