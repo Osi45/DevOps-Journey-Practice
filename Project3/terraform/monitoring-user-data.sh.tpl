@@ -2,7 +2,12 @@
 
 # Update and install required packages
 sudo apt update -y
-sudo apt install -y docker.io unzip wget curl 
+sudo apt install -y docker.io unzip wget curl jq 
+
+# Install Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.7/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 # Start and enable Docker
 sudo systemctl enable docker
@@ -37,10 +42,9 @@ scrape_configs:
   - job_name: "node_exporter_metrics"
     static_configs:
       - targets: ["${WEB_APP_IP}:9100"]
-
 EOF
 
-# Prometheus alerting rules
+# Alerting rules
 cat <<EOF > alerts.yml
 groups:
   - name: instance-down
@@ -80,10 +84,9 @@ groups:
         annotations:
           summary: "Low disk space on {{ \$labels.instance }}"
           description: "{{ \$labels.instance }} disk usage is above 80%."
-
 EOF
 
-# Alertmanager config with Slack
+# Alertmanager config
 cat <<EOF > alertmanager.yml
 global:
   resolve_timeout: 5m
@@ -92,7 +95,7 @@ route:
   group_wait: 10s
   group_interval: 30s
   repeat_interval: 1h
-  receiver: 'slack-notifications
+  receiver: 'slack-notifications'
 
 receivers:
   - name: 'slack-notifications'
@@ -100,7 +103,6 @@ receivers:
       - send_resolved: true
         token: '${SLACK_BOT_TOKEN}'
         channel: '${SLACK_CHANNEL_ID}'
-
 EOF
 
 # Grafana provisioning
@@ -118,7 +120,6 @@ datasources:
     access: proxy
     url: http://prometheus:9090
     isDefault: true
-
 EOF
 
 # Grafana dashboard provisioning
@@ -134,13 +135,12 @@ providers:
     updateIntervalSeconds: 10
     options:
       path: /var/lib/grafana/dashboards
-
 EOF
 
-# Download a sample Grafana dashboard
+# Download sample dashboard
 wget -O dashboards/node_exporter_full.json https://grafana.com/api/dashboards/1860/revisions/33/download
 
-# Docker Compose configuration
+# Docker Compose file
 cat <<EOF > docker-compose.yml
 version: "3.8"
 
@@ -151,9 +151,6 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - ./alerts.yml:/etc/prometheus/alerts.yml
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--web.enable-lifecycle'
     ports:
       - "9090:9090"
     networks:
@@ -177,6 +174,9 @@ services:
     container_name: grafana
     ports:
       - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./dashboards:/var/lib/grafana/dashboards
     networks:
       - monitoring_net
 
@@ -205,8 +205,8 @@ services:
 
 networks:
   monitoring_net:
-  
+    driver: bridge
 EOF
 
-# Start the monitoring stack
-docker compose up -d
+# Launch the stack
+docker-compose up -d
