@@ -42,3 +42,13 @@ variable "availability_zone" {
   description = "Availability Zone"
   type        = string
 }
+
+variable "SLACK_BOT_TOKEN" {
+  description = "Slack bot token"
+  type        = string
+}
+
+variable "SLACK_CHANNEL_ID" {
+  description = "Slack channel ID"
+  type        = string
+}
