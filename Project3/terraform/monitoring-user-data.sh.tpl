@@ -2,13 +2,13 @@
 
 # Update and install required packages
 sudo apt update -y
-sudo apt install -y docker.io docker-compose unzip wget curl
+sudo apt install -y docker.io unzip wget curl 
 
 # Start and enable Docker
 sudo systemctl enable docker
 sudo systemctl start docker
 
-# Install and start SSM agent
+# Install and enable SSM agent
 sudo snap install amazon-ssm-agent --classic
 sudo systemctl enable amazon-ssm-agent
 sudo systemctl restart amazon-ssm-agent || sudo systemctl start amazon-ssm-agent
@@ -20,13 +20,15 @@ sudo usermod -aG docker ubuntu
 mkdir -p /opt/monitoring
 cd /opt/monitoring
 
-# Replace this with the actual private IP of the web app (e.g., 10.0.1.10)
-WEB_APP_IP="10.0.1.10"
-
 # Prometheus config
 cat <<EOF > prometheus.yml
 global:
   scrape_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
 
 rule_files:
   - "alerts.yml"
@@ -50,6 +52,51 @@ groups:
         annotations:
           summary: "Instance {{ \$labels.instance }} is down"
           description: "{{ \$labels.instance }} has been unreachable for 1 minute."
+
+      - alert: HighCPUUsage
+        expr: 100 - (avg by (instance)(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ \$labels.instance }}"
+          description: "{{ \$labels.instance }} CPU usage is above 80%."
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Memory usage on {{ \$labels.instance }}"
+          description: "{{ \$labels.instance }} memory usage is above 80%."
+
+      - alert: LowDiskSpace
+        expr: (node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} - node_filesystem_free_bytes{fstype!~"tmpfs|overlay"}) / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} * 100 > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low disk space on {{ \$labels.instance }}"
+          description: "{{ \$labels.instance }} disk usage is above 80%."
+
+EOF
+
+# Alertmanager config with Slack
+cat <<EOF > alertmanager.yml
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: 'slack-notifications'
+
+receivers:
+  - name: 'slack-notifications'
+    slack_configs:
+      - send_resolved: true
+        token: '\${SLACK_BOT_TOKEN}'
+        channel: '\${SLACK_CHANNEL_ID
+
 EOF
 
 # Grafana provisioning
@@ -57,7 +104,7 @@ mkdir -p grafana/provisioning/dashboards
 mkdir -p grafana/provisioning/datasources
 mkdir -p dashboards
 
-# Grafana data source config
+# Grafana data source
 cat <<EOF > grafana/provisioning/datasources/datasource.yml
 apiVersion: 1
 
@@ -84,10 +131,10 @@ providers:
       path: /var/lib/grafana/dashboards
 EOF
 
-# Download node exporter dashboard
+# Download a sample Grafana dashboard
 wget -O dashboards/node_exporter_full.json https://grafana.com/api/dashboards/1860/revisions/33/download
 
-# Docker Compose stack
+# Docker Compose configuration
 cat <<EOF > docker-compose.yml
 version: "3"
 services:
@@ -98,6 +145,15 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - ./alerts.yml:/etc/prometheus/alerts.yml
+
+  alertmanager:
+    image: prom/alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
 
   grafana:
     image: grafana/grafana
