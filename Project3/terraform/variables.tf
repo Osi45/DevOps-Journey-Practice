@@ -43,12 +43,8 @@ variable "availability_zone" {
   type        = string
 }
 
-variable "SLACK_BOT_TOKEN" {
-  description = "Slack bot token"
+variable "SLACK_WEBHOOK_URL" {
+  description = "Slack Incoming Webhook URL"
   type        = string
-}
-
-variable "SLACK_CHANNEL_ID" {
-  description = "Slack channel ID"
-  type        = string
+  sensitive   = true
 }
