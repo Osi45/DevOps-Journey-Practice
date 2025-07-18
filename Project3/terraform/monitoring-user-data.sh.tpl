@@ -101,7 +101,7 @@ receivers:
   - name: 'slack-notifications'
     slack_configs:
       - send_resolved: true
-        SLACK_WEBHOOK_URL: "${SLACK_WEBHOOK_URL}"
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 EOF
 
 # Grafana provisioning
@@ -163,7 +163,7 @@ services:
     ports:
       - "9093:9093"
     environment:
-      SLACK_WEBHOOK_URL: "${SLACK_WEBHOOK_URL}"
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     networks:
       - monitoring_net
 
