@@ -43,8 +43,7 @@ variable "availability_zone" {
   type        = string
 }
 
-variable "SLACK_WEBHOOK_URL" {
-  description = "Slack Incoming Webhook URL"
+variable "PAGERDUTY_ROUTING_KEY" {
+  description = "PagerDuty Integration Key"
   type        = string
-  sensitive   = true
 }
