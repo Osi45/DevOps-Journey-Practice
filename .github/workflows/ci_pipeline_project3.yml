@@ -104,7 +104,7 @@ jobs:
         }
       }'
 
-- name: PagerDuty Failure Notification
+     - name: PagerDuty Failure Notification
   if: failure()
   run: |
     curl -X POST https://events.pagerduty.com/v2/enqueue \
