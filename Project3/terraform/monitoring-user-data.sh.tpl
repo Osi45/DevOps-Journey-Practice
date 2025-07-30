@@ -164,7 +164,7 @@ services:
     ports:
       - "9093:9093"
     environment:
-      PAGERDUTY_INTEGRATION_KEY="${PAGER_INTEGRATION_KEY}"
+      PAGERDUTY_INTEGRATION_KEY="${PAGERDUTY_INTEGRATION_KEY}"
     networks:
       - monitoring_net
 
