@@ -164,7 +164,7 @@ services:
     ports:
       - "9093:9093"
     environment:
-      PAGER_INTEGRATION_KEY: ${{ secrets.PAGER_INTEGRATION_KEY }}
+      PAGER_INTEGRATION_KEY="${PAGER_INTEGRATION_KEY}"
     networks:
       - monitoring_net
 
