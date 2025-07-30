@@ -40,7 +40,7 @@ jobs:
         run: terraform init -reconfigure
 
       - name: Terraform Plan
-        run: terraform plan -out=tfplan 
+        run: terraform plan -var="pagerduty_routing_key=${{ secrets.PAGERDUTY_ROUTING_KEY }}" -out=tfplan 
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
