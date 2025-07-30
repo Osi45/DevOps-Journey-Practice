@@ -28,7 +28,7 @@ resource "aws_instance" "monitoring" {
 
   user_data = templatefile("${path.module}/monitoring-user-data.sh.tpl", {
     web_app_private_ip = aws_instance.web_app.private_ip
-    PAGERDUTY_ROUTING_KEY     = var.PAGERDUTY_ROUTING_KEY
+    PAGERDUTY_ROUTING_KEY     = var.pagerduty_routing_key
   })
 
   depends_on = [aws_instance.web_app] 
