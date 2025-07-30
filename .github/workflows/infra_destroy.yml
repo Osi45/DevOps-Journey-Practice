@@ -33,27 +33,10 @@ jobs:
         with:
           terraform_version: 1.8.3
 
-      - name: PagerDuty Notification - Destroy Started
-        env:
-          PAGERDUTY_ROUTING_KEY: ${{ secrets.PAGERDUTY_ROUTING_KEY }}
-        run: |
-          curl -X POST https://events.pagerduty.com/v2/enqueue \
-            -H "Content-Type: application/json" \
-            -d '{
-              "routing_key": "'"$PAGERDUTY_ROUTING_KEY"'",
-              "event_action": "trigger",
-              "payload": {
-                "summary": "Terraform destroy started for Project3",
-                "severity": "info",
-                "source": "github-actions",
-                "component": "Project3",
-                "group": "Infrastructure",
-                "class": "Destroy"
-              }
-            }'
-
       - name: Terraform Init
         run: terraform init -reconfigure
 
       - name: Terraform Destroy
+        env:
+          TF_VAR_pagerduty_routing_key: ${{ secrets.PAGERDUTY_ROUTING_KEY }}
         run: terraform destroy -auto-approve 
