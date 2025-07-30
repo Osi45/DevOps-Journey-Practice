@@ -43,7 +43,7 @@ variable "availability_zone" {
   type        = string
 }
 
-variable "PAGERDUTY_ROUTING_KEY" {
-  description = "PagerDuty Integration Key"
+variable "pagerduty_routing_key" {
+  description = "PagerDuty Routing/ Integration Key"
   type        = string
 }

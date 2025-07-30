@@ -95,13 +95,14 @@ route:
   group_wait: 10s
   group_interval: 30s
   repeat_interval: 1h
-  receiver: 'slack-notifications'
+  receiver: 'pagerduty-notifications'
 
 receivers:
-  - name: 'slack-notifications'
-    slack_configs:
-      - send_resolved: true
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  - name: 'pagerduty-notifications'
+    pagerduty_configs:
+      - routing_key: "${PAGERDUTY_ROUTING_KEY}"
+        send_resolved: true
+
 EOF
 
 # Grafana provisioning
@@ -163,7 +164,7 @@ services:
     ports:
       - "9093:9093"
     environment:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      PAGER_INTEGRATION_KEY: ${{ secrets.PAGER_INTEGRATION_KEY }}
     networks:
       - monitoring_net
 
