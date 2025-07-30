@@ -84,29 +84,43 @@ jobs:
             --region us-east-1 \
             --output text
 
-      - name: Slack Success Notification
-        if: success()
-        uses: slackapi/slack-github-action@v1.25.0
-        with:
-          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          slack-message: |
-            ✅ *Project3 Web App* deployment succeeded!
-            *Branch:* ${{ github.ref_name }}
-            *Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>
-            *Actor:* ${{ github.actor }}
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      - name: PagerDuty Success Notification
+  if: success()
+  run: |
+    curl -X POST https://events.pagerduty.com/v2/enqueue \
+      -H "Content-Type: application/json" \
+      -d '{
+        "routing_key": "${{ secrets.PAGERDUTY_ROUTING_KEY }}",
+        "event_action": "trigger",
+        "payload": {
+          "summary": "✅ Project3 Web App deployment succeeded!",
+          "source": "GitHub Actions CI/CD",
+          "severity": "info",
+          "custom_details": {
+            "Branch": "${{ github.ref_name }}",
+            "Commit": "${{ github.sha }}",
+            "Actor": "${{ github.actor }}"
+          }
+        }
+      }'
 
-      - name: Slack Failure Notification
-        if: failure()
-        uses: slackapi/slack-github-action@v1.25.0
-        with:
-          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          slack-message: |
-            ❌ *Project3 Web App* deployment failed!
-            *Branch:* ${{ github.ref_name }}
-            *Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>
-            *Actor:* ${{ github.actor }}
-            <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+- name: PagerDuty Failure Notification
+  if: failure()
+  run: |
+    curl -X POST https://events.pagerduty.com/v2/enqueue \
+      -H "Content-Type: application/json" \
+      -d '{
+        "routing_key": "${{ secrets.PAGERDUTY_ROUTING_KEY }}",
+        "event_action": "trigger",
+        "payload": {
+          "summary": "❌ Project3 Web App deployment failed!",
+          "source": "GitHub Actions CI/CD",
+          "severity": "error",
+          "custom_details": {
+            "Branch": "${{ github.ref_name }}",
+            "Commit": "${{ github.sha }}",
+            "Actor": "${{ github.actor }}",
+            "Run URL": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          }
+        }
+      }'  
