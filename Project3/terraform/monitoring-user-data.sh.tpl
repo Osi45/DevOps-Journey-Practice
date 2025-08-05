@@ -2,7 +2,7 @@
 
 # Update and install required packages
 sudo apt update -y
-sudo apt install -y docker.io unzip wget curl  
+sudo apt install -y docker.io unzip wget curl python3 python3-pip  
 
 # Install Docker Compose
 sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.7/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -21,6 +21,9 @@ sudo systemctl restart amazon-ssm-agent || sudo systemctl start amazon-ssm-agent
 # Add Ubuntu user to Docker group
 sudo usermod -aG docker ubuntu
 
+# Install Python packages for monitoring and self-healing
+sudo pip3 install requests psutil
+
 # Create monitoring folder structure
 mkdir -p /opt/monitoring
 cd /opt/monitoring
@@ -36,54 +39,12 @@ alerting:
         - targets: ["alertmanager:9093"]
 
 rule_files:
-  - "alerts.yml"
+  - "/opt/monitoring/alerts.yml"  # External reference to alerts.yml file
 
 scrape_configs:
   - job_name: "node_exporter_metrics"
     static_configs:
       - targets: ["${web_app_private_ip}:9100"]
-EOF
-
-# Alerting rules
-cat <<EOF > alerts.yml
-groups:
-  - name: instance-down
-    rules:
-      - alert: InstanceDown
-        expr: up == 0
-        for: 1m
-        labels:
-          severity: critical
-        annotations:
-          summary: "Instance {{ \$labels.instance }} is down"
-          description: "{{ \$labels.instance }} has been unreachable for 1 minute."
-
-      - alert: HighCPUUsage
-        expr: 100 - (avg by (instance)(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
-        for: 2m
-        labels:
-          severity: warning
-        annotations:
-          summary: "High CPU usage on {{ \$labels.instance }}"
-          description: "{{ \$labels.instance }} CPU usage is above 80%."
-
-      - alert: HighMemoryUsage
-        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 80
-        for: 2m
-        labels:
-          severity: warning
-        annotations:
-          summary: "High Memory usage on {{ \$labels.instance }}"
-          description: "{{ \$labels.instance }} memory usage is above 80%."
-
-      - alert: LowDiskSpace
-        expr: (node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} - node_filesystem_free_bytes{fstype!~"tmpfs|overlay"}) / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} * 100 > 80
-        for: 2m
-        labels:
-          severity: warning
-        annotations:
-          summary: "Low disk space on {{ \$labels.instance }}"
-          description: "{{ \$labels.instance }} disk usage is above 80%."
 EOF
 
 # Alertmanager config
@@ -102,7 +63,6 @@ receivers:
     pagerduty_configs:
       - routing_key: "${PAGERDUTY_ROUTING_KEY}"
         send_resolved: true
-
 EOF
 
 # Grafana provisioning
@@ -150,7 +110,7 @@ services:
     container_name: prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./alerts.yml:/etc/prometheus/alerts.yml
+      - ./alerts.yml:/etc/prometheus/alerts.yml  # External reference to alerts.yml file
     ports:
       - "9090:9090"
     networks:
@@ -209,3 +169,7 @@ EOF
 
 # Launch the stack
 docker-compose up -d
+
+# Start the self-healing Python script
+echo "Starting self-healing mechanism"
+python3 /opt/monitoring/self_heal.py &

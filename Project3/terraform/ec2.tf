@@ -29,6 +29,8 @@ resource "aws_instance" "monitoring" {
   user_data = templatefile("${path.module}/monitoring-user-data.sh.tpl", {
     web_app_private_ip = aws_instance.web_app.private_ip
     PAGERDUTY_ROUTING_KEY     = var.pagerduty_routing_key
+    alerts                    = data.template_file.alerts.rendered
+    self_heal                 = data.template_file.self_heal.rendered
   })
 
   depends_on = [aws_instance.web_app] 
@@ -36,4 +38,12 @@ resource "aws_instance" "monitoring" {
   tags = {
     Name = "${var.project_name}-monitoring"
   }
+}
+
+data "template_file" "alerts" {
+  template = file("${path.module}/alerts.yml")
+}
+
+data "template_file" "self_heal" {
+  template = file("${path.module}/self_heal.py")
 }
