@@ -2,7 +2,7 @@
 
 # Update and install required packages
 sudo apt update -y
-sudo apt install -y docker.io unzip wget curl python3 python3-pip  
+sudo apt install -y docker.io unzip wget curl python3 python3-pip amazon-ssm-agent 
 
 # Install Docker Compose
 sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.7/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -14,9 +14,8 @@ sudo systemctl enable docker
 sudo systemctl start docker
 
 # Install and enable SSM agent
-sudo snap install amazon-ssm-agent --classic
 sudo systemctl enable amazon-ssm-agent
-sudo systemctl restart amazon-ssm-agent || sudo systemctl start amazon-ssm-agent
+sudo systemctl start amazon-ssm-agent
 
 # Add Ubuntu user to Docker group
 sudo usermod -aG docker ubuntu
